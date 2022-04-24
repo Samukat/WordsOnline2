@@ -1,0 +1,133 @@
+{% extends "public/templates/public_template.html" %}
+{% block title %} WordsOnline {% endblock %}
+{% block title1 %} WordsOnline {% endblock %}
+
+
+{% block head %}
+<script>
+    var channel = String('{{ channel }}');
+    var original_words = '';
+    var passed_editpass = '';
+    var passed_viewpass = '';
+</script>
+{% endblock head %}
+
+
+
+
+{% block main %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">
+                <small id="" name="chid">Words{% if channel != null %}: {% endif %}  {{ channel }} </small>
+            </h1>
+            <div class="form-group">
+                <!-- <label for="exampleFormControlTextarea1">Example textarea</label> -->
+                <textarea class="form-control" id="WordsBox" rows="20" name="wordsTXT" placeholder="Wow so empty", onkeyup="updateIcon();">{{ data }}</textarea>
+              </div>
+            <p>Enter words above</p>
+        </div>
+    </div>
+
+    {% if channel != null %}
+    <div class="row">
+        <div class="col-lg-12 text-right">
+            <!-- <div class="form-group">
+                <input type="text" class="form-control" name="ch">
+            </div> -->
+            <img src="" id="successImg">
+            <button type="submit" class="btn btn-default" value="save" name="save_btn" onclick="save_channel();">Save</button>
+            <button type="submit" class="btn btn-default" value="cancel" name="cancel_btn" onclick="location.reload();">Cancel</button>
+            <p>Send new content to servers</p>
+        </div>
+
+    </div>
+
+    <div class="row form-inline">
+        <div class="col-lg-12">
+            <h3 class="page-header">
+                <small class="text-muted" id="" name="chid">Optional Settings</small>
+            </h3>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="">View and Edit password (Needs to be saved)</span>
+                </div>
+                <input type="text" class="form-control" placeholder="View pass" id="ViewPass" value="{{ viewPass }}" onkeyup="updateIcon();"> 
+                <input type="text" class="form-control" placeholder="Edit pass" id="EditPass" value="{{ editpass }}" onkeyup="updateIcon();">
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock main%}
+
+
+
+{% block script %}
+<script>
+    function save_channel(){
+        var current_words = document.getElementById("WordsBox").value;
+        var NewviewPass = document.getElementById("ViewPass").value;
+        var NeweditPass = document.getElementById("EditPass").value;
+
+
+        if (current_words == original_words && NewviewPass == passed_viewpass && NeweditPass == passed_editpass){
+            console.log("No change in data");
+            document.getElementById("successImg").src = "{{ url_for('static', filename='img/success.ico') }}";
+            return;
+        }
+    
+        var data = {
+            ch_name: channel,
+            words: current_words,
+            newviewPass: NewviewPass,
+            neweditPass: NeweditPass
+        };
+
+        console.log(data);
+        document.getElementById("successImg").src = "";
+        fetch(`${window.origin}/savedata`, {
+            method: "POST",
+            credentials: "include",
+            body: JSON.stringify(data),
+            cache: "no-cache",
+            headers: new Headers({
+                "content-type": "application/json"
+            })
+        })
+        .then(function (response){
+            if (response.status != 200){
+                console.log(`Response status was not 200: ${response.status}`);
+                document.getElementById("successImg").src = "{{ url_for('static', filename='img/fail.ico') }}";
+                return;
+            }
+            
+            response.json().then(function (data2) {
+                console.log(data2);
+
+                if (data2["result"] == "success"){
+                    document.getElementById("successImg").src = "{{ url_for('static', filename='img/success.ico') }}";
+                } else {
+                    document.getElementById("successImg").src = "{{ url_for('static', filename='img/fail.ico') }}";
+                }
+                
+                original_words = current_words;
+                passed_viewpass = NewviewPass;
+                passed_editpass = NeweditPass;
+            })
+
+        })
+    }
+
+    function updateIcon(){
+        document.getElementById("successImg").src = "";
+    }
+    document.addEventListener('readystatechange', event => { 
+        if (event.target.readyState === "complete") {
+            original_words = document.getElementById("WordsBox").value;
+            passed_editpass = document.getElementById("EditPass").value;
+        }
+    });
+</script>
+{% endblock %}

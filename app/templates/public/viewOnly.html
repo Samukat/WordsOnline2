@@ -1,0 +1,24 @@
+{% extends "public/templates/public_template.html" %}
+{% block title %} WordsOnline {% endblock %}
+{% block title1 %} WordsOnline {% endblock %}
+
+{% block main %}
+
+<div class="container">
+
+
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">
+                <small id="" name="chid">Words{% if channel != null %}: {% endif %}  {{ channel }} </small>
+            </h1>
+            <div class="form-group">
+                <!-- <label for="exampleFormControlTextarea1">Example textarea</label> -->
+                <textarea class="form-control" id="WordsBox" rows="20" name="wordsTXT" readonly style="background-color:white;">{{ data }}</textarea>
+              </div>
+            <p>Enter words above</p>
+        </div>
+    </div>
+</div>
+
+{% endblock main%}
