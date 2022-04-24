@@ -9,7 +9,7 @@ from app import app, encoder
 
 
 
-db_connect = create_engine(app.dbConnection)
+db_connect = create_engine()
 
 def get_channel_ID(ch_name):
     conn = db_connect.connect()
