@@ -1,10 +1,11 @@
-from app import app
+from app import app, socketio
+from flask_socketio import SocketIO
 
 if __name__ == "__main__":
     app.secret_key = ''
-
     app.debug = True
-    app.run()
+    socketio.run(app)
+
 
 
 #pipreqs C:\Users\Sam\Desktop\coding\WordsOnline\newFlask\WordsOnline 
