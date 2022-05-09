@@ -11,10 +11,34 @@ from app import app, encoder
 
 db_connect = create_engine()
 
+def preventTimeOut(func):
+    def wrapper(*args, **kwargs):
+        #retry on timeout (once)
+        try:
+            x = func(*args, **kwargs)
+        except sqlalchemy.exc.OperationalError as e:
+            print(e)
+            time.sleep(1)
+            x = func(*args, **kwargs)
+        except Exception as e:
+            print(e)
+            time.sleep(1)
+            x = func(*args, **kwargs)
+        return x
+    return wrapper
+  
+
+@preventTimeOut
 def get_channel_ID(ch_name):
     conn = db_connect.connect()
     queryString = text("select id from wordsonline where channel = :ch_name")
-    query = conn.execute(queryString, {"ch_name":ch_name})
+
+    try:
+        query = conn.execute(queryString, {"ch_name":ch_name})
+    except sqlalchemy.exc.OperationalError as e:
+        print(e)
+        query = conn.execute(queryString, {"ch_name":ch_name})
+
     result = [dict(zip(tuple (query.keys()) ,i)) for i in query.cursor]
     conn.close()
 
@@ -25,8 +49,42 @@ def get_channel_ID(ch_name):
     else:
         return None
 
+@preventTimeOut
+def check_auth(encoded_ch_ID=None, ch_name=None, viewPass=None, editPass=None):
+    if ch_name == None and encoded_ch_ID== None:
+        raise TypeError("check_auth() takes exactly one channel identifier (0 given)")
+    if ch_name != None and encoded_ch_ID != None:
+        raise TypeError("check_auth() takes exactly one channel identifier (2 given)")
 
+
+    conn = db_connect.connect()
+    if ch_name != None:
+        queryString = text("select pass, viewPass from wordsonline where channel = :ch_name")
+        query = conn.execute(queryString, {"ch_name":ch_name})
+    else:
+        queryString = text("select pass, viewPass from wordsonline where id = :ch_ID")
+        query = conn.execute(queryString, {"ch_ID":encoder.decode(encoded_ch_ID)})
+    conn.close()
     
+
+    result = {'data': [dict(zip(tuple (query.keys()) ,i)) for i in query.cursor]}
+
+    if len(result['data']) == 0:
+        return True
+
+    if (result['data'][0]['viewPass'] != None):
+        if (result['data'][0]['pass'] == editPass and editPass != None):
+            return True
+        elif (result['data'][0]['viewPass'] != viewPass):
+            return False
+
+    if (result['data'][0]['pass'] != None):
+        if (result['data'][0]['pass'] != editPass):
+            return False
+
+    return True
+
+@preventTimeOut  
 def get_channel_name(encoded_ch_ID):
     conn = db_connect.connect()
     queryString = text("select channel from wordsonline where id = :ch_ID")
@@ -40,7 +98,7 @@ def get_channel_name(encoded_ch_ID):
     else:
         return None
 
-
+@preventTimeOut
 def get_words(encoded_ch_ID=None, ch_name=None, viewPass=None, editPass=None):
     if ch_name == None and encoded_ch_ID== None:
         raise TypeError("get_words() takes exactly one channel identifier (0 given)")
@@ -86,7 +144,8 @@ def get_words(encoded_ch_ID=None, ch_name=None, viewPass=None, editPass=None):
 
     #result['data'][0].pop('pass')
     return result
-        
+
+@preventTimeOut  
 def save_values(encoded_ch_ID=None, ch_name=None, editPass=None, viewPass=None, neweditPass=None, newviewPass=None, words=None):
     if ch_name == None and encoded_ch_ID== None:
         raise TypeError("get_words() takes exactly one channel identifier (0 given)")
