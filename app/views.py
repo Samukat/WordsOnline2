@@ -40,6 +40,18 @@ def index():
 
     return render_template("public/viewOnly.html", data="Words Online: \nSelect channel to start")
 
+
+@app.route("/google80e78d20a4630b6b.html")
+def google_site_verf():
+    return render_template("google80e78d20a4630b6b.html")
+
+@app.route("/sitemap.xml")
+def sitemap():
+    sitemap_xml= render_template(url_for('sitemap'))
+    response = make_response(sitemap_xml)
+    response.headers["Content-Type"] = "application/xml"
+    return response
+
 @app.route("/<enid>", methods=["GET", "POST"])
 def indexWords(enid):
     

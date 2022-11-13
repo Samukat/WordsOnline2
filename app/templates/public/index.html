@@ -42,11 +42,11 @@
             <button type="submit" class="btn btn-default" value="cancel" name="cancel_btn" onclick="location.reload();">Cancel</button>
             <p>Send new content to servers</p>
             {% if channel != null %}
-                <div class="form-check form-check-inline">
+                <!-- <div class="form-check form-check-inline">
                     <input class="form-check-input" type="checkbox" id="autosavebox" value="autosave">
                     <label class="form-check-label" for="autosavebox">Auto Update</label>
                 </div>
-                <!-- <div class="form-check form-check-inline">
+                <div class="form-check form-check-inline">
                     <input class="form-check-input" type="checkbox" id="autoupdatebox" value="autoupdate" onclick='socket.send("connection established");'>
                     <label class="form-check-label" for="autoupdatebox">Auto Save</label>
                 </div> -->
@@ -151,7 +151,7 @@
 
        
             // socket stuff (rememebr to change ip)
-            socket = io.connect('http://127.0.0.1:5000/')
+            socket = io.connect('http://wordsonline.ddns.net/')
             socket.on('connect', function(){
                 socket.send("connection established");
                 if (passed_editpass == ''){

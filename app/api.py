@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine
+import sqlalchemy
 from sqlalchemy.sql import text
 from json import dumps
 import flask_jsonpify
@@ -9,7 +10,8 @@ from app import app, encoder
 
 
 
-db_connect = create_engine()
+db_connect = create_engine("")
+
 
 def preventTimeOut(func):
     def wrapper(*args, **kwargs):
