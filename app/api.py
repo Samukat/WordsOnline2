@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 import sqlalchemy
 from sqlalchemy.sql import text
+import json
 from json import dumps
 import flask_jsonpify
 import time
@@ -10,7 +11,9 @@ from app import app, encoder
 
 
 
-db_connect = create_engine("")
+with open("config.json", "r") as jsonfile:
+    data = json.load(jsonfile)
+db_connect = create_engine(data["MySQL_connection"])
 
 
 def preventTimeOut(func):
